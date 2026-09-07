@@ -27,21 +27,28 @@ Kalau dosen memperbaiki sesuatu di pertemuan yang sudah dirilis (mis. ada bug di
 Bagian di bawah ini **isi bertahap** sesuai level yang sedang kalian kerjakan (lihat `pertemuan-01/SOAL.md`) — heading-nya dicek otomatis, jangan diganti namanya.
 
 ## Identitas
-- Nama: (tulis di sini)
-- NRP: (tulis di sini)
-- Kelas: (tulis di sini)
+- Nama: Alfarel Sandriano Subektiansyah
+- NRP: 5053241048
+- Kelas: M
 
 ## Commit vs Push
-(tulis di sini)
+Commit merupakan operasi untuk menyimpan perubahan yang telah dibuat ke db git lokal (`.git`).
+Sedangkan, push merupakan operasi untuk mengirim perubahan ke remote repository (misalnya GitHub).
 
 ## Reproducibility
-(tulis di sini)
+Reproducible berarti apabila rekan tim menjalankan program Go di perangkatnya sendiri, hasilnya harus identik dengan apabila kita menjalankan program Go di perangkat kita sendiri. Entah itu hasil binary, test, maupun runtime behavior.
+
+Apabila rekan tim memiliki versi Go yang berbeda, hasilnya tergantung perbedaan versi yang dimiliki oleh rekan tim. Apabila versi yang berbeda merupakan versi minor, maka tidak akan ada masalah serius yang muncul. Masalah serius akan muncul apabila perbedaan versi Go merupakan major. Contoh masalah yang dihasilkan antara lain:
+- perbedaan semantik loop variable (Go 1.21 vs Go 1.22)
+- ada versi minimum di `go.mod` tetapi toolchain lokal lebih rendah
 
 ## Catatan Merge Conflict
 (tulis di sini)
 
 ## Kenapa .gitignore Penting
-(tulis di sini)
+`.gitignore` itu penting karena baik di environment testing maupun production, akan ada hal-hal yang harus kita sembunyikan ketika kita melakukan push ke remote server. Misal menyembunyikan `.env` yang terdapat API key third party service tertentu. Dan apabila file build/IDE ikut ter-push ke remote server, dan rekan tim kita mendapatkan copy-an file tersebut, maka bisa saja:
+1. build error ketika rekan tim melakukan build program Go
+2. konfigurasi IDE rekan tim ter-override oleh file IDE kita
 
 ## Refleksi
-(tulis di sini)
+Sejauh ini, soal-soal yang diberikan cukup menjelaskan hal-hal yang awalnya saya tidak memahami. Dan tidak ada kesulitan yang signifikan ketika mengerjakan soal-soal pertemuan 1.
