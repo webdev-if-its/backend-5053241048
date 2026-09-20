@@ -97,21 +97,50 @@ func AmankanPanggilan(fn func() error) (err error) {
 // request, server tetap hidup untuk request-request lain (request yang
 // panic itu dijawab status 500).
 func AmankanHandler(next http.HandlerFunc) http.HandlerFunc {
-	panic("belum diimplementasikan")
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if r := recover(); r != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+		}()
+		next.ServeHTTP(w, r)
+	}
 }
 
 // RekapStatus menghitung berapa tugas yang sudah selesai dan berapa yang
 // belum, dikembalikan sebagai map dengan persis dua kunci: "selesai" dan
 // "belum selesai".
 func RekapStatus(toko *TokoTugas) map[string]int {
-	panic("belum diimplementasikan")
+	rekap := map[string]int{"selesai":0, "belum selesai":0}
+
+	for _, v := range(toko.Daftar) {
+		if v.Selesai == true {
+			rekap["selesai"]++
+		} else {
+			rekap["belum selesai"]++
+		}
+	}
+
+	return rekap
 }
 
 // BuatHandlerTugas mengembalikan HandlerFunc yang menuliskan daftar tugas
 // di toko sebagai teks biasa ke w (satu tugas per baris), diikuti satu
 // baris ringkasan dari RekapStatus.
 func BuatHandlerTugas(toko *TokoTugas) http.HandlerFunc {
-	panic("belum diimplementasikan")
+	return func(w http.ResponseWriter, r *http.Request) {
+		for _, v := range(toko.Daftar) {
+			var selesai string
+			if v.Selesai {
+				selesai = "selesai"
+			} else {
+				selesai = "belum selesai"
+			}
+			fmt.Fprintf(w, "%d. %s [%s]\n", v.ID, v.Judul, selesai)
+		}
+		rekap := RekapStatus(toko)
+		fmt.Fprintf(w, "Ringkasan: %d selesai, %d belum selesai", rekap["selesai"], rekap["belum selesai"])
+	}
 }
 
 func main() {
