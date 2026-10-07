@@ -112,13 +112,47 @@ func UnduhKeChannel(files []File, unduh Pengunduh) <-chan Hasil {
 // UnduhBatas seperti UnduhSemua tapi paling banyak `maks` unduhan berjalan
 // pada saat yang sama. (Level 8)
 func UnduhBatas(files []File, unduh Pengunduh, maks int) ([]Hasil, error) {
-	panic("belum diimplementasikan")
+	if maks < 1 {
+		return nil, ErrBatasTidakValid
+	}
+	hasil := make([]Hasil, len(files))
+	sem := make(chan struct{}, maks)
+	var wg sync.WaitGroup
+
+	for i, f := range files {
+		sem <- struct{}{}
+		wg.Add(1)
+		go func(i int, f File) {
+			defer wg.Done()
+			defer func() {
+				<-sem
+			}()
+			hasil[i] = unduh(f)
+		}(i, f)
+	}
+	wg.Wait()
+	return hasil, nil
 }
 
 // GabungChannel menggabungkan banyak channel menjadi satu (fan-in); channel
 // hasil ditutup setelah SEMUA channel masukan tertutup. (Level 9)
 func GabungChannel(chs ...<-chan Hasil) <-chan Hasil {
-	panic("belum diimplementasikan")
+	out := make(chan Hasil)
+	var wg sync.WaitGroup
+	for _, c := range chs {
+		wg.Add(1)
+		go func(c <- chan Hasil) {
+			defer wg.Done()
+			for h := range c {
+				out <- h
+			}
+		}(c)
+	}
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+	return out
 }
 
 // Ringkasan adalah potret progres unduhan. (Level 10)
@@ -131,29 +165,38 @@ type Ringkasan struct {
 
 // String memformat ringkasan untuk laporan. (Level 10)
 func (r Ringkasan) String() string {
-	panic("belum diimplementasikan")
+	return fmt.Sprintf("%d dari %d berhasil, %d gagal, total %d KB", r.Selesai, r.Total, r.Gagal, r.TotalKB)
 }
 
 // Progres mencatat progres unduhan dan AMAN dipakai banyak goroutine
 // sekaligus. (Level 10)
 type Progres struct {
 	mu sync.Mutex
-	// TODO: tambahkan field penghitung yang kalian butuhkan
+	r Ringkasan
 }
 
 // NewProgres membuat Progres untuk `total` unduhan. (Level 10)
 func NewProgres(total int) *Progres {
-	panic("belum diimplementasikan")
+	return &Progres{r: Ringkasan{Total: total}}
 }
 
 // Catat mencatat satu hasil unduhan. (Level 10)
 func (p *Progres) Catat(h Hasil) {
-	panic("belum diimplementasikan")
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if h.Err != nil {
+		p.r.Gagal++
+		return
+	}
+	p.r.Selesai++
+	p.r.TotalKB += h.UkuranKB
 }
 
 // Snapshot mengembalikan potret progres saat ini. (Level 10)
 func (p *Progres) Snapshot() Ringkasan {
-	panic("belum diimplementasikan")
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.r
 }
 
 func main() {
